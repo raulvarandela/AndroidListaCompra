@@ -36,17 +36,25 @@ public class MainActivity extends AppCompatActivity {
         lvItems.setAdapter(this.itemsAdapter);
         lvItems.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                if (pos >= 0) {
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int pos, long l) { //para cuando mantengo pulsado
+                /*if (pos >= 0) {
                     MainActivity.this.items.remove(pos);
                     MainActivity.this.itemsAdapter.notifyDataSetChanged();
                     MainActivity.this.updateStatus();
-                }
+                }*/
+                eliminar(pos);
                 return false;
             }
         });
 
-        btAdd.setOnClickListener(new View.OnClickListener() {
+        lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                modificar(position);
+            }
+        });
+
+        btAdd.setOnClickListener(new View.OnClickListener() { //para cuando pulso el boton
             @Override
             public void onClick(View view) {
                 MainActivity.this.onAdd();
@@ -55,6 +63,56 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void modificar(final int pos){
+        final EditText edText = new EditText(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Modificar");
+        builder.setMessage("Inserta las nuevos cambios");
+        builder.setView(edText);
+
+
+        builder.setNeutralButton("Modificar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final String text = edText.getText().toString();
+                items.remove(pos);
+                items.add(pos,text);
+                itemsAdapter.notifyDataSetChanged();
+            }
+        });
+        builder.setNegativeButton("No", null);
+        builder.create().show();
+    }
+
+    private void eliminar(final int pos){
+        final EditText edText = new EditText(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Eliminar");
+        builder.setMessage("Seguro que quiere eliminar este elemento de su lista de la compra?");
+        //builder.setView(edText); para el punto 2 si
+
+        builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                MainActivity.this.items.remove(pos);
+                MainActivity.this.itemsAdapter.notifyDataSetChanged();
+                MainActivity.this.updateStatus();
+            }
+        });
+        /*builder.setNeutralButton("Modificar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final String text = edText.getText().toString();
+                items.remove(pos);
+                items.add(pos,text);
+                itemsAdapter.notifyDataSetChanged();
+            }
+        });*/
+        builder.setNegativeButton("No", null);
+        builder.create().show();
+    }
+
+
     private void onAdd() {
         final EditText edText = new EditText(this);
 
@@ -62,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle("A comprar...");
         builder.setMessage("Nombre");
         builder.setView(edText);
-        builder.setPositiveButton("+", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Añadir", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 final String text = edText.getText().toString();
