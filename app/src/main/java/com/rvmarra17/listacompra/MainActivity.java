@@ -1,10 +1,13 @@
 package com.rvmarra17.listacompra;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -17,6 +20,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    private int posicion;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button btAdd = (Button) this.findViewById(R.id.btAdd);
         ListView lvItems = (ListView) this.findViewById(R.id.lvItems);
+        this.registerForContextMenu(lvItems);
 
         lvItems.setLongClickable(true);
         this.itemsAdapter = new ArrayAdapter<String>(
@@ -42,17 +48,17 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.itemsAdapter.notifyDataSetChanged();
                     MainActivity.this.updateStatus();
                 }*/
-                eliminar(pos);
+                posicion = pos;
                 return false;
             }
         });
 
-        lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        /*lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 modificar(position);
             }
-        });
+        });*/
 
         btAdd.setOnClickListener(new View.OnClickListener() { //para cuando pulso el boton
             @Override
@@ -63,12 +69,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void modificar(final int pos){
+    private void modificar(final int pos) {
         final EditText edText = new EditText(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Modificar");
         builder.setMessage("Inserta las nuevos cambios");
         builder.setView(edText);
+        edText.setText(items.get(pos));
 
 
         builder.setNeutralButton("Modificar", new DialogInterface.OnClickListener() {
@@ -76,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 final String text = edText.getText().toString();
                 items.remove(pos);
-                items.add(pos,text);
+                items.add(pos, text);
                 itemsAdapter.notifyDataSetChanged();
             }
         });
@@ -84,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    private void eliminar(final int pos){
+    private void eliminar(final int pos) {
         final EditText edText = new EditText(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Eliminar");
@@ -140,4 +147,41 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayAdapter<String> itemsAdapter;
     private ArrayList<String> items;
+
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        if (v.getId() == R.id.lvItems) {
+            this.getMenuInflater().inflate(R.menu.menu_contextual, menu);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        super.onContextItemSelected(item);
+
+
+
+        boolean toret = false;
+
+        switch (item.getItemId()) {
+            case R.id.opEliminar:
+                eliminar(posicion);
+                toret = true;
+                break;
+            case R.id.opAñadir:
+                this.onAdd();
+                toret = true;
+                break;
+            case R.id.opModificar:
+                this.modificar(posicion);
+                toret = true;
+                break;
+
+        }
+
+        return toret;
+    }
 }
