@@ -1,12 +1,14 @@
-package com.rvmarra17.listacompra;
+package com.rvmarra17.listacompra.ui;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -15,6 +17,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.rvmarra17.listacompra.R;
+import com.rvmarra17.listacompra.core.Item;
+import com.rvmarra17.listacompra.core.ItemArrayAdapter;
 
 import java.util.ArrayList;
 
@@ -34,11 +40,7 @@ public class MainActivity extends AppCompatActivity {
         this.registerForContextMenu(lvItems);
 
         lvItems.setLongClickable(true);
-        this.itemsAdapter = new ArrayAdapter<String>(
-                this.getApplicationContext(),
-                android.R.layout.simple_selectable_list_item,
-                this.items
-        );
+        this.itemsAdapter = new ItemArrayAdapter(this, items);
         lvItems.setAdapter(this.itemsAdapter);
         lvItems.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -145,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         txtNum.setText(Integer.toString(this.itemsAdapter.getCount()));
     }
 
-    private ArrayAdapter<String> itemsAdapter;
+    private ItemArrayAdapter itemsAdapter;
     private ArrayList<String> items;
 
 
@@ -161,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         super.onContextItemSelected(item);
-
 
 
         boolean toret = false;
@@ -184,4 +185,71 @@ public class MainActivity extends AppCompatActivity {
 
         return toret;
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        this.getMenuInflater().inflate(R.menu.menu, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        super.onOptionsItemSelected(item);
+
+        switch (item.getItemId()) {
+            case R.id.op_anhadir:
+                this.onAdd();
+                break;
+            case R.id.op_salir:
+                System.exit(0);
+        }
+
+        return true;
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        final SharedPreferences pref = this.getPreferences(MODE_PRIVATE);
+        final SharedPreferences.Editor editor = pref.edit();
+        StringBuilder cadena = new StringBuilder();
+
+
+        for (int i = 0; i < items.size(); i++) {
+            cadena.append(items.get(i));
+            cadena.append(" ");
+
+        }
+        editor.putString("items", cadena.toString());
+        editor.apply();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+
+        items.removeAll(items);
+        itemsAdapter.notifyDataSetChanged();
+        final SharedPreferences pref = this.getPreferences(MODE_PRIVATE);
+        final String itemsStr = pref.getString("items", "");
+
+        final String[] array = itemsStr.split(" ");
+
+
+        for (String item : array) {
+            itemsAdapter.add(item);
+        }
+
+        this.updateStatus();
+
+    }
+
+
 }
