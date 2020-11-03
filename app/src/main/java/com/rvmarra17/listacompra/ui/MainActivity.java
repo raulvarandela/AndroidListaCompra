@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.rvmarra17.listacompra.R;
 import com.rvmarra17.listacompra.core.Item;
@@ -233,22 +234,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-
-        items.removeAll(items);
-        itemsAdapter.notifyDataSetChanged();
         final SharedPreferences pref = this.getPreferences(MODE_PRIVATE);
         final String itemsStr = pref.getString("items", "");
-
         final String[] array = itemsStr.split(" ");
+        items.removeAll(items);
+        itemsAdapter.notifyDataSetChanged();
 
-
-        for (String item : array) {
-            itemsAdapter.add(item);
+        if (array.length != 1 || !array[0].equals("")) {
+            for (String item : array) {
+                itemsAdapter.add(item);
+            }
+            this.updateStatus();
         }
-
-        this.updateStatus();
-
     }
 
 
